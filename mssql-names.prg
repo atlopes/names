@@ -1,0 +1,151 @@
+*
+* MSSQLNamer
+*
+* Get a name that is syntactically acceptable for MSSQL names (tables, columns...).
+* Do not accept reserved words (and it's a bit more restritive concerning @ and # at the start of the name).
+*
+*
+* MSSQLDelimitedNamer
+*
+* Get a name that is syntactically acceptable for MSSQL names (tables, columns...).
+* The returned name is properly delimited with [].
+*
+DEFINE CLASS MSSQLNamer AS NameProcessor
+
+	HIDDEN Alpha
+	HIDDEN Digit
+	HIDDEN Reserved
+	
+	FUNCTION Init
+	LPARAMETERS Host AS Namer
+
+		DODEFAULT(m.Host)
+
+		This.Alpha = This.Host.CodePointRange("a", "z") + This.Host.CodePointRange("A", "Z")
+		This.Digit = This.Host.CodePointRange("0", "9")
+
+		TEXT TO This.Reserved NOSHOW FLAGS 1 PRETEXT 11
+			|ADD|EXTERNAL|PROCEDURE|
+			|ALL|FETCH|PUBLIC|ALTER|FILE|RAISERROR|
+			|AND|FILLFACTOR|READ|
+			|ANY|FOR|READTEXT|
+			|AS|FOREIGN|RECONFIGURE|
+			|ASC|FREETEXT|REFERENCES|
+			|AUTHORIZATION|FREETEXTTABLE|REPLICATION|
+			|BACKUP|FROM|RESTORE|
+			|BEGIN|FULL|RESTRICT|
+			|BETWEEN|FUNCTION|RETURN|
+			|BREAK|GOTO|REVERT|
+			|BROWSE|GRANT|REVOKE|
+			|BULK|GROUP|RIGHT|
+			|BY|HAVING|ROLLBACK|
+			|CASCADE|HOLDLOCK|ROWCOUNT|
+			|CASE|IDENTITY|ROWGUIDCOL|
+			|CHECK|IDENTITY_INSERT|RULE|
+			|CHECKPOINT|IDENTITYCOL|SAVE|
+			|CLOSE|IF|SCHEMA|
+			|CLUSTERED|IN|SECURITYAUDIT|
+			|COALESCE|INDEX|SELECT|
+			|COLLATE|INNER|SEMANTICKEYPHRASETABLE|
+			|COLUMN|INSERT|SEMANTICSIMILARITYDETAILSTABLE|
+			|COMMIT|INTERSECT|SEMANTICSIMILARITYTABLE|
+			|COMPUTE|INTO|SESSION_USER|
+			|CONSTRAINT|IS|SET|
+			|CONTAINS|JOIN|SETUSER|
+			|CONTAINSTABLE|KEY|SHUTDOWN|
+			|CONTINUE|KILL|SOME|
+			|CONVERT|LEFT|STATISTICS|
+			|CREATE|LIKE|SYSTEM_USER|
+			|CROSS|LINENO|TABLE|
+			|CURRENT|LOAD|TABLESAMPLE|
+			|CURRENT_DATE|MERGE|TEXTSIZE|
+			|CURRENT_TIME|NATIONAL|THEN|
+			|CURRENT_TIMESTAMP|NOCHECK|TO|
+			|CURRENT_USER|NONCLUSTERED|TOP|
+			|CURSOR|NOT|TRAN|
+			|DATABASE|NULL|TRANSACTION|
+			|DBCC|NULLIF|TRIGGER|
+			|DEALLOCATE|OF|TRUNCATE|
+			|DECLARE|OFF|TRY_CONVERT|
+			|DEFAULT|OFFSETS|TSEQUAL|
+			|DELETE|ON|UNION|
+			|DENY|OPEN|UNIQUE|
+			|DESC|OPENDATASOURCE|UNPIVOT|
+			|DISK|OPENQUERY|UPDATE|
+			|DISTINCT|OPENROWSET|UPDATETEXT|
+			|DISTRIBUTED|OPENXML|USE|
+			|DOUBLE|OPTION|USER|
+			|DROP|OR|VALUES|
+			|DUMP|ORDER|VARYING|
+			|ELSE|OUTER|VIEW|
+			|END|OVER|WAITFOR|
+			|ERRLVL|PERCENT|WHEN|
+			|ESCAPE|PIVOT|WHERE|
+			|EXCEPT|PLAN|WHILE|
+			|EXEC|PRECISION|WITH|
+			|EXECUTE|PRIMARY|WITHIN GROUP|
+			|EXISTS|PRINT|WRITETEXT|
+			|EXIT|PROC|
+		ENDTEXT
+	
+	ENDFUNC
+	
+	FUNCTION GetName
+	LPARAMETERS NoDefaultChars AS Boolean
+	
+		LOCAL GetMSSQLName AS String
+
+		m.GetMSSQLName = This.Host.GetANSIName(This.Alpha + "_", ;
+									This.Alpha + This.Digit + "_@#$", ;
+									128, ;
+									IIF(m.NoDefaultChars, "", "_"), ;
+									IIF(m.NoDefaultChars, "", "_"))
+		
+		IF "|"+UPPER(m.GetMSSQLName)+"|" $ This.Reserved
+
+			IF m.NoDefaultChars
+				m.GetMSSQLName = .NULL.
+			ELSE
+				m.GetMSSQLName = LEFT("_" + m.GetMSSQLName, 128)
+			ENDIF
+
+		ENDIF
+
+		RETURN m.GetMSSQLName
+	
+	ENDFUNC
+
+ENDDEFINE
+
+DEFINE CLASS MSSQLDelimitedNamer AS NameProcessor
+
+	HIDDEN Allowed
+	
+	FUNCTION Init
+	LPARAMETERS Host AS Namer
+
+		DODEFAULT(m.Host)
+
+		This.Allowed = CHRTRAN(This.Host.CodePointRange(CHR(32), CHR(255)), '[]""', "")
+	ENDFUNC
+	
+	FUNCTION GetName
+	LPARAMETERS NoDefaultChars AS Boolean
+	
+		LOCAL GetMSSQLName AS String
+		
+		m.GetMSSQLName = This.Host.GetANSIName("", ;
+									This.Allowed, ;
+									128, ;
+									"", ;
+									IIF(m.NoDefaultChars, "", "_"))
+	
+		IF !ISNULL(m.GetMSSQLName)
+			m.GetMSSQLName = '[' + m.GetMSSQLName + ']'
+		ENDIF
+		
+		RETURN m.GetMSSQLName
+
+	ENDFUNC
+
+ENDDEFINE

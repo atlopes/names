@@ -1,0 +1,5 @@
+*.BAK
+*.FXP
+namer.txt
+stable/
+test namer.prg
