@@ -13,13 +13,15 @@ DEFINE CLASS VFPNamer AS NameProcessor
 	HIDDEN Alpha
 	HIDDEN Digit
 	HIDDEN Reserved
-	
+
 	MaxLen = 254
 
 	FUNCTION Init
 	LPARAMETERS Host AS Namer
 
 		DODEFAULT(m.Host)
+		
+		This.SetProperty("SafeArrayName", .T.)
 
 		This.Alpha = This.Host.CodePointRange("a", "z") + This.Host.CodePointRange("A", "Z") + "Åäåöúü" + ;
 			This.Host.CodePointRange("¿", "÷") + This.Host.CodePointRange("ÿ", "ˆ") + ;
@@ -477,7 +479,9 @@ DEFINE CLASS VFPNamer AS NameProcessor
 			IF m.NoDefaultChars
 				m.GetVFPName = .NULL.
 			ELSE
-				m.GetVFPName = LEFT("_" + m.GetVFPName, This.MaxLen)
+				IF This.GetProperty("SafeArrayName")
+					m.GetVFPName = LEFT("_" + m.GetVFPName, This.MaxLen)
+				ENDIF
 			ENDIF
 
 		ENDIF

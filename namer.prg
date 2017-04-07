@@ -134,7 +134,7 @@ DEFINE CLASS Namer AS Custom
 		ASSERT VARTYPE(m.ProcessorIdentifier) $ "CN" ;
 			MESSAGE "Process identifier must be a string or a numeric index."
 		ASSERT VARTYPE(m.ProcessorIdentifier) == "C" ;
-			MESSAGE "Property must be a string."
+			MESSAGE "Property name must be a string."
 
 		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
 
@@ -154,7 +154,7 @@ DEFINE CLASS Namer AS Custom
 		ASSERT VARTYPE(m.ProcessorIdentifier) $ "CN" ;
 			MESSAGE "Process identifier must be a string or a numeric index."
 		ASSERT VARTYPE(m.ProcessorIdentifier) == "C" ;
-			MESSAGE "Property must be a string."
+			MESSAGE "Property name must be a string."
 
 		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
 
