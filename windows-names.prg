@@ -4,6 +4,12 @@
 * Get a name that is syntactically acceptable for Windows names (folders, files...).
 * Do not accept reserved words and assume a MAX_PATH element of 260 characters.
 *
+
+* install itself
+IF !SYS(16) $ SET("Procedure")
+	SET PROCEDURE TO (SYS(16)) ADDITIVE
+ENDIF
+
 DEFINE CLASS WindowsNamer AS NameProcessor
 
 	HIDDEN Allowed

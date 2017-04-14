@@ -19,7 +19,22 @@
 *
 * See *-names.prg for a set of ready-made name processors
 *
+
+* install itself
+IF !SYS(16) $ SET("Procedure")
+	SET PROCEDURE TO (SYS(16)) ADDITIVE
+ENDIF
+
 DEFINE CLASS Namer AS Custom
+
+	_memberdata = '<VFPData>' + ;
+						'<memberdata name="setoriginalname" type="method" display="SetOriginalName"/>' + ;
+						'<memberdata name="getoriginalname" type="method" display="GetOriginalName"/>' + ;
+						'<memberdata name="attachprocessor" type="method" display="AttachProcessor"/>' + ;
+						'<memberdata name="getname" type="method" display="GetName"/>' + ;
+						'<memberdata name="setproperty" type="method" display="SetProperty"/>' + ;
+						'<memberdata name="getproperty" type="method" display="GetProperty"/>' + ;
+						'</VFPData>'
 
 	ADD OBJECT PROTECTED NameProcessors AS Collection
 
@@ -111,10 +126,14 @@ DEFINE CLASS Namer AS Custom
 
 		LOCAL Identifier AS StringOrNumber
 
-		ASSERT VARTYPE(m.ProcessorIdentifier) $ "CN" ;
+		ASSERT PCOUNT() = 0 OR VARTYPE(m.ProcessorIdentifier) $ "CN" ;
 			MESSAGE "Process identifier must be a string or a numeric index."
 
-		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
+		IF PCOUNT() > 0
+			m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
+		ELSE
+			m.Identifier = 1
+		ENDIF
 
 		* actually calls the method of the identified processor to get a translated name
 		RETURN This.NameProcessors(m.Identifier).GetName(m.NoDefaultChars)
