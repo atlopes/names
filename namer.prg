@@ -25,6 +25,8 @@ IF !SYS(16) $ SET("Procedure")
 	SET PROCEDURE TO (SYS(16)) ADDITIVE
 ENDIF
 
+#DEFINE SAFETHIS			ASSERT !USED("This") AND TYPE("This") == "O"
+
 DEFINE CLASS Namer AS Custom
 
 	_memberdata = '<VFPData>' + ;
@@ -90,6 +92,8 @@ DEFINE CLASS Namer AS Custom
 	FUNCTION AttachProcessor
 	LPARAMETERS ProcessorClass AS String, ;
 		ProcessorLibrary AS String
+
+		SAFETHIS
 
 		LOCAL ProcessorKey AS String
 
@@ -224,6 +228,8 @@ DEFINE CLASS Namer AS Custom
 		MaxLen AS Integer, ;
 		DefaultFirstChar AS Character, ;
 		DefaultChar AS Character
+
+		SAFETHIS
 
 		LOCAL GetName AS String			&& the running result
 		LOCAL LoopIndex AS Integer		&& an index to access the name characters
