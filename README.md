@@ -1,4 +1,4 @@
-# Namer
+# NameSyntaxChecker
 
 A VFP class to verify the correctness and to control the translation of a string into a syntactically correct name of a particular domain (for instance, the name of VFP variables or fields, the name of XML elements, Windows file names, ...).
 
