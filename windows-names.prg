@@ -60,7 +60,7 @@ DEFINE CLASS WindowsNamer AS NameProcessor
 									"", ;
 									IIF(m.NoDefaultChars, "", "_"))
 		
-		IF "|"+UPPER(m.GetWindowsName)+"|" $ This.Reserved
+		IF "|"+UPPER(JUSTFNAME(m.GetWindowsName))+"|" $ This.Reserved
 
 			IF m.NoDefaultChars
 				m.GetWindowsName = .NULL.
