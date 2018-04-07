@@ -1,5 +1,7 @@
 *.BAK
 *.FXP
+*.txt
+*.ERR
 namer.txt
 stable/
 test namer.prg
