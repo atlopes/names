@@ -140,7 +140,11 @@ DEFINE CLASS Namer AS Custom
 		ENDIF
 
 		* actually calls the method of the identified processor to get a translated name
-		RETURN This.NameProcessors(m.Identifier).GetName(m.NoDefaultChars)
+		IF EMPTY(This.NameProcessors.GetKey(m.Identifier))
+			RETURN .NULL.
+		ELSE
+			RETURN This.NameProcessors(m.Identifier).GetName(m.NoDefaultChars)
+		ENDIF
 
 	ENDFUNC
 
@@ -162,7 +166,9 @@ DEFINE CLASS Namer AS Custom
 		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
 
 		* actually, calls the method of the processor that handles properties
-		This.NameProcessors(m.Identifier).SetProperty(m.Property, m.Setting)
+		IF !EMPTY(This.NameProcessors.GetKey(m.Identifier))
+			This.NameProcessors(m.Identifier).SetProperty(m.Property, m.Setting)
+		ENDIF
 
 	ENDFUNC
 
@@ -182,7 +188,11 @@ DEFINE CLASS Namer AS Custom
 		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
 
 		* actually, calls the method of the processor that handles properties
-		RETURN This.NameProcessors(m.Identifier).GetProperty(m.Property)
+		IF !EMPTY(This.NameProcessors.GetKey(m.Identifier))
+			RETURN This.NameProcessors(m.Identifier).GetProperty(m.Property)
+		ELSE
+			RETURN .NULL.
+		ENDIF
 
 	ENDFUNC
 
@@ -216,7 +226,7 @@ DEFINE CLASS Namer AS Custom
 	*		ToDBCS - indicating if the output is an ANSI string (.F.) or a DBCS string (.T.)
 	* 		FirstChars - the set of characters that may occur at the beginning of a name
 	*		OtherChars - the set of characters that may occur in the rest of the name
-	*		MaxLen - the max length of the name (0 if o limit set)
+	*		MaxLen - the max length of the name (0 if no limit set)
 	*		DefaultFirstChar - what must be used as a default character, if the first one in the original name is not allowed
 	*					(empty if inserting a default character shouldn'd be attempted)
 	*		DefaultChar - what must be used as a default character in the rest of the name
