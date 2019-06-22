@@ -22,6 +22,7 @@ DEFINE CLASS VFPNamer AS NameProcessor
 		DODEFAULT(m.Host)
 		
 		This.SetProperty("SafeArrayName", .T.)
+		This.SetProperty("AllowReserved", .T.)
 
 		This.Alpha = This.Host.CodePointRange("a", "z") + This.Host.CodePointRange("A", "Z") + "ŠŒšœŸ" + ;
 			This.Host.CodePointRange("À", "Ö") + This.Host.CodePointRange("Ø", "ö") + ;
@@ -472,16 +473,14 @@ DEFINE CLASS VFPNamer AS NameProcessor
 									IIF(m.NoDefaultChars, "", "_"), ;
 									IIF(m.NoDefaultChars, "", "_"))
 
-		IF !ISNULL(m.GetVFPName) AND ;
+		IF !ISNULL(m.GetVFPName) AND !This.GetProperty("AllowReserved") AND ;
 				("|" + UPPER(m.GetVFPName) + "|" $ This.Reserved OR ;
-					(LEN(m.GetVFPName) = 4 AND "|" + UPPER(m.GetVFPName) $ This.Reserved))
-		
-			IF m.NoDefaultChars
+					(LEN(m.GetVFPName) >= 4 AND "|" + UPPER(m.GetVFPName) $ This.Reserved))
+
+			IF m.NoDefaultChars AND !This.GetProperty("SafeArrayName")
 				m.GetVFPName = .NULL.
 			ELSE
-				IF This.GetProperty("SafeArrayName")
-					m.GetVFPName = LEFT("_" + m.GetVFPName, This.MaxLen)
-				ENDIF
+				m.GetVFPName = LEFT("_" + m.GetVFPName, This.MaxLen)
 			ENDIF
 
 		ENDIF
