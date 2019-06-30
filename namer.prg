@@ -242,7 +242,9 @@ DEFINE CLASS Namer AS Custom
 		SAFETHIS
 
 		LOCAL GetName AS String			&& the running result
-		LOCAL LoopIndex AS Integer		&& an index to access the name characters
+		LOCAL CheckIndex AS Integer	&& an index to access the name characters
+		LOCAL DefChar AS Character
+		LOCAL NotAllowed AS String
 
 		m.GetName = This.Original
 		* operate only on a non-NULL original name (NULL original name results in a NULL translated name)
@@ -256,15 +258,16 @@ DEFINE CLASS Namer AS Custom
 				m.GetName = STRCONV(m.GetName, 1)
 			ENDCASE
 
-			* if FirstChars are not set, no rule apply
+			* if FirstChars are set, the rule for initial character apply
 			IF !EMPTY(m.FirstChars)
 
 				* test if the first character of the original name is allowed
 				IF !LEFTC(m.GetName,1) $ m.FirstChars
 
 					* if not, and a default first character was designated, insert it at the beginning of the translated name
-					IF !EMPTY(m.DefaultFirstChar)
-						m.GetName = m.DefaultFirstChar + m.GetName
+					m.DefChar = LEFTC(m.DefaultFirstChar, 1)
+					IF !EMPTY(m.DefChar)
+						m.GetName = m.DefChar + m.GetName
 					ELSE
 						* if a default character was not designated, remove all leading invalid characters
 						DO WHILE LENC(m.GetName) > 0 AND !LEFTC(m.GetName, 1) $ m.FirstChars
@@ -275,35 +278,24 @@ DEFINE CLASS Namer AS Custom
 				ENDIF
 
 				* start to check the rest of the name at the (now) second character
-				m.LoopIndex = 2
+				m.CheckIndex = 2
 
 			ELSE
 
 				* no rule for first character, so start to check on beginning of the name
-				m.LoopIndex = 1
+				m.CheckIndex = 1
 
 			ENDIF
 
-			* while there is someting to check in the name
-			DO WHILE m.LoopIndex <= LENC(m.GetName)
-
-				* if a character is not allowed
-				IF !SUBSTRC(m.GetName, m.LoopIndex, 1) $ m.OtherChars
-
-					* if there is not a default character, remove the invalid one from the name
-					IF EMPTY(m.DefaultChar)
-						m.GetName = LEFTC(m.GetName, m.LoopIndex - 1) + SUBSTRC(m.GetName, m.LoopIndex + 1)
-						m.LoopIndex = m.LoopIndex - 1
-					ELSE
-						* otherwise, replace it with the default
-						m.GetName = LEFTC(m.GetName, m.LoopIndex - 1) + m.DefaultChar + SUBSTRC(m.GetName, m.LoopIndex + 1)
-					ENDIF
-
-				ENDIF
-
-				* go to the next position
-				m.LoopIndex = m.LoopIndex + 1
-			ENDDO
+			* select the characters from the name that are not allowed
+			m.NotAllowed = CHRTRANC(SUBSTRC(m.GetName, m.CheckIndex), m.OtherChars, "")
+			m.DefChar = LEFTC(m.DefaultChar, 1)
+			IF !EMPTY(m.DefChar)
+				* if there is a default char, the not allowed chars will be replaced, otherwise removed
+				m.DefChar = REPLICATE(m.DefChar, LENC(m.NotAllowed))
+			ENDIF
+			* perform the removal or replacement of disallowed characters from the source name
+			m.GetName = LEFTC(m.GetName, m.CheckIndex - 1) + CHRTRANC(SUBSTRC(m.GetName, m.CheckIndex), m.NotAllowed, m.DefChar)
 
 			* we're done, so make sure that the translated name has a valid size (if one was given)
 			IF m.MaxLen > 0
