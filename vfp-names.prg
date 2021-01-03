@@ -334,6 +334,7 @@ DEFINE CLASS VFPNamer AS NameProcessor
 			|PI|
 			|POPUP|
 			|PRIMARY|
+			|PRINT|
 			|PRINTSTATUS|
 			|PRMBAR|
 			|PRMPAD|
