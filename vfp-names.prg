@@ -236,6 +236,7 @@ DEFINE CLASS VFPNamer AS NameProcessor
 			|HOME|
 			|HOUR|
 			|ICASE|
+			|ID|
 			|IDXCOLLATE|
 			|IIF|
 			|IMESTATUS|
