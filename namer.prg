@@ -58,6 +58,16 @@ DEFINE CLASS Namer AS Custom
 	
 	ENDFUNC
 
+	* Cleanup
+	* Clean up tasks
+	FUNCTION Cleanup
+
+		DO WHILE This.NameProcessors.Count > 0
+			This.DetachProcessor(1)
+		ENDDO
+
+	ENDFUNC
+
 	* SetOriginalName
 	* Set the name that is going to be processed by name processors
 	* A boolean flag may indicate that the name is a DBCS string
@@ -120,6 +130,24 @@ DEFINE CLASS Namer AS Custom
 		* if the processor was attached, return > 0 (that may used as a identifier), or 0 if an error occurred
 		RETURN This.NameProcessors.GetKey(m.ProcessorKey)
 	
+	ENDFUNC
+
+	* DetachProcessor
+	* Discards an attached processor.
+	FUNCTION DetachProcessor
+	LPARAMETERS ProcessorKey
+
+		ASSERT VARTYPE(m.ProcessorKey) $ "CN" MESSAGE "Process identifier must be a string or numeric index."
+
+		LOCAL Identifier AS StringOrNumber
+
+		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
+
+		IF !EMPTY(This.NameProcessors.GetKey(m.Identifier))
+			This.NameProcessors.Item(m.Identifier).Cleanup()
+			This.NameProcessors.Remove(m.Identifier)
+		ENDIF
+
 	ENDFUNC
 
 	* GetName
@@ -354,6 +382,12 @@ DEFINE CLASS NameProcessor AS Custom
 		This.Host = m.Host
 		
 		RETURN .T.
+	ENDFUNC
+
+	FUNCTION Cleanup
+
+		This.Host = .NULL.
+
 	ENDFUNC
 
 	FUNCTION GetName
