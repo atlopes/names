@@ -135,13 +135,13 @@ DEFINE CLASS Namer AS Custom
 	* DetachProcessor
 	* Discards an attached processor.
 	FUNCTION DetachProcessor
-	LPARAMETERS ProcessorKey
+	LPARAMETERS ProcessorIdentifier
 
-		ASSERT VARTYPE(m.ProcessorKey) $ "CN" MESSAGE "Process identifier must be a string or numeric index."
+		ASSERT VARTYPE(m.ProcessorIdentifier) $ "CN" MESSAGE "Process identifier must be a string or numeric index."
 
 		LOCAL Identifier AS StringOrNumber
 
-		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C",UPPER(m.ProcessorIdentifier),m.ProcessorIdentifier)
+		m.Identifier = IIF(VARTYPE(m.ProcessorIdentifier) == "C", UPPER(m.ProcessorIdentifier), m.ProcessorIdentifier)
 
 		IF !EMPTY(This.NameProcessors.GetKey(m.Identifier))
 			This.NameProcessors.Item(m.Identifier).Cleanup()
